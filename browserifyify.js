@@ -15,6 +15,7 @@ Array.prototype.getUnique = function(){
    return a;
 }
 
+// determine if an expression is a member of THREE.js
 var isThreeObject = function(node){
   if(node.type == "MemberExpression" && node.object.name=="THREE")
     return true;
@@ -22,6 +23,7 @@ var isThreeObject = function(node){
     return false;
 };
 
+// Determine if a statement is of the form THREE.*** = some_stuff
 var isThreeAssignment = function(node){
   if(node.type == "AssignmentExpression"){
     if(isThreeObject(node.left))
@@ -30,8 +32,15 @@ var isThreeAssignment = function(node){
   return false;
 };
 
+// write browserify sourcefile/directory from three.js file path
+var addCorrespondingFile = function(file){
+  if(fs.lstatSync(file).isDirectory()){
+
+  }
+};
 
 var processFilesRecursive = function(file, dependencies){
+  addCorrespondingFile(file);
   if(fs.lstatSync(file).isDirectory()){
     var file_list = fs.readdirSync(file);
     for(var i = 0; i < file_list.length; i++){
