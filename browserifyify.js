@@ -187,25 +187,86 @@ var getFileFromObject = function(object, dependencies){
     if(dependencies[file].definedObjects.indexOf(object) != -1)
       return file;
   }
-  console.log(object);
   return null;
 };
 
 var gatherRequiredFiles = function(file, dependencies){
-  var undefinedUsedObjects = getUndefinedUsedObjects(dependencies[file])
-  return undefinedUsedObjects.map(function(value){
+  var undefinedUsedObjects = getUndefinedUsedObjects(dependencies[file]);
+  console.log(undefinedUsedObjects);
+  var required_files = undefinedUsedObjects.map(function(value){
     return getFileFromObject(value, dependencies)
   }).getUnique();
+  console.log(required_files);
+  return required_files;
 };
 
+var getRequiredVariables = function(file, dependencies){
+  if(path.basename(file) == "Three.js")
+    return ["THREE"];
+  else if(file != null){
+    return dependencies[file].definedObjects;
+  }else
+    return [];
+};
+
+var generateRequires = function(path, required_variables){
+  if(required_variables.length == 1){
+    var new_node = {};
+    new_node.type = "VariableDeclaration";
+    var declarations = [{
+      type: "VariableDeclarator",
+      id: {
+        type: 'Identifier',
+        name: required_variables[0]
+      },
+      init: {
+        type: "CallExpression",
+        callee: {
+          type: "Identifier",
+          name: "require"
+        },
+        "arguments": [
+          {
+            type: "Literal",
+            value: path,
+            raw: "'"+path+"'"
+          }
+        ]
+      }
+    }];
+    new_node.declarations = declarations;
+    new_node.kind = "var";
+    return [new_node];
+  }else if(required_variables.length > 1){
+    var result = [];
+
+
+    return result;
+  }else
+    return [];
+};
 // Take dependencies, calculate requires, then prepend them
 var prependRequires = function(dependencies, asts){
   for(var file in asts){
     if(path.basename(file) != "Three.js"){
-      var required_files = gatherRequiredFiles(file, dependencies).map(function(value){
+      var required_files = gatherRequiredFiles(file, dependencies);
+      var require_paths = required_files.map(function(value){
         if(value != null)
           return path.relative(file, value);
       });
+
+      var required_variables = required_files.map(function(value){
+        return getRequiredVariables(value, dependencies);
+      });
+
+      var require_nodes = [];
+
+      for(var i = 0; i < required_files.length; i++){
+        console.log(required_variables[i]);
+        require_nodes = require_nodes.concat(generateRequires(require_paths[i], required_variables[i]));
+      }
+
+      asts[file].body = require_nodes.concat(asts[file].body);
     }
   }
 };
@@ -244,6 +305,5 @@ var dependencies = {},
 asts = {};
 
 calculateDependenciesAndASTs(working_path, dependencies, asts);
-console.log(dependencies);
 transformASTs(dependencies, asts);
 writeFiles(working_path, dependencies, asts);
