@@ -239,7 +239,42 @@ var generateRequires = function(path, required_variables){
     return [new_node];
   }else if(required_variables.length > 1){
     var result = [];
-
+    for(var i = 0; i < required_variables.length; i++){
+      var new_node = {};
+      new_node.type = "VariableDeclaration";
+      var declarations = [{
+        type: "VariableDeclarator",
+        id: {
+          type: 'Identifier',
+          name: required_variables[i]
+        },
+        init: {
+          type: "MemberExpression",
+          computed: false,
+          object: {
+            type: "CallExpression",
+            callee: {
+              type: "Identifier",
+              name: "require"
+            },
+            "arguments": [
+              {
+                type: "Literal",
+                value: path,
+                raw: "'"+path+"'"
+              }
+            ]
+          },
+          property: {
+            type: "Identifier",
+            name: required_variables[i]
+          }
+        }
+      }];
+      new_node.declarations = declarations;
+      new_node.kind = "var";
+      result.push(new_node);
+    }
 
     return result;
   }else
