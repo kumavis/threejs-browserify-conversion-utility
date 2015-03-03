@@ -31,12 +31,6 @@ var isThreeAssignment = function(node){
   return false;
 };
 
-var addCorrespondingFile = function(file){
-  if(fs.lstatSync(file).isDirectory()){
-
-  }
-};
-
 // Calculate the dependencies and abstract syntax trees of a particular javascript file
 var calcJSDependenciesAndASTs = function(file, dependencies, asts){
   if(path.extname(file) != '.js')
@@ -89,14 +83,17 @@ var writeJSFile = function(file, dependencies, asts){
 
 var writeFiles = function(file, dependencies, asts){
   if(fs.lstatSync(file).isDirectory()){
-    // If what we have is a directory, then we want to go through
-    // each file in the directory and calculate the dependencies of each one.
     var file_list = fs.readdirSync(file);
     for(var i = 0; i < file_list.length; i++){
       writeFiles(path.join(file, file_list[i]), dependencies, asts);
     }
   }else
     writeJSFile(file, dependencies, asts);
+};
+
+// take dependencies and calculate new asts
+var transformASTs = function(dependencies, asts){
+
 };
 
 var clean = function(){
@@ -121,6 +118,7 @@ var dependencies = {},
 asts = {};
 
 calculateDependenciesAndASTs(working_path, dependencies, asts);
+transformASTs(dependencies, asts);
 writeFiles(working_path, dependencies, asts);
 // calculate initial dependencies, first pass
 console.log(dependencies)
