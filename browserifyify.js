@@ -95,7 +95,6 @@ var isGlobalThreeObject = function(node, dependencies){
     if(path.basename(k)=="Three.js")
       three = k;
   }
-  console.log(node.name);
 
   if(dependencies[three].definedObjects.indexOf(node.name) != -1)
     return true;
@@ -129,7 +128,7 @@ var isNonGlobalAssignmentExpression = function(node, dependencies){
 // then we want to remove the leading THREE object from it, since it will
 // ultimately be declared as a local variable and then exported and loaded from
 // the three object.
-var replaceNonGlobalhreeObjects = function(dependencies, asts){
+var replaceNonGlobalThreeObjects = function(dependencies, asts){
   for(var file in asts){
     estraverse.replace(asts[file], {
       enter: function(node, parent){
@@ -143,7 +142,18 @@ var replaceNonGlobalhreeObjects = function(dependencies, asts){
 };
 
 var replaceWithVariableDeclaration = function(node){
-
+  var new_node = {};
+  new_node.type = "VariableDeclaration";
+  var declarations = [{
+    type: "VariableDeclarator",
+    id: node.expression.left,
+    init: node.expression.right
+  }];
+  console.log(node);
+  console.log(declarations);
+  new_node.declarations = declarations;
+  new_node.kind = "var";
+  return new_node;
 };
 
 // Change statements of the form "NonGlobalThreeObject ="
@@ -202,4 +212,3 @@ asts = {};
 calculateDependenciesAndASTs(working_path, dependencies, asts);
 transformASTs(dependencies, asts);
 writeFiles(working_path, dependencies, asts);
-console.log(dependencies)
