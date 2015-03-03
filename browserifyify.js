@@ -141,6 +141,7 @@ var replaceNonGlobalThreeObjects = function(dependencies, asts){
   }
 };
 
+// Assumes the node that is passed in is an expression statement
 var replaceWithVariableDeclaration = function(node){
   var new_node = {};
   new_node.type = "VariableDeclaration";
@@ -149,8 +150,6 @@ var replaceWithVariableDeclaration = function(node){
     id: node.expression.left,
     init: node.expression.right
   }];
-  console.log(node);
-  console.log(declarations);
   new_node.declarations = declarations;
   new_node.kind = "var";
   return new_node;
@@ -171,9 +170,44 @@ var changeNonGlobalsToLocals = function(dependencies, asts){
   }
 };
 
+var getUndefinedUsedObjects = function(dependencies){
+  var result = [];
+  var definedObjects = dependencies.definedObjects;
+  var usedObjects = dependencies.usedObjects;
+  for(var i = 0; i < usedObjects.length; i++){
+    if(definedObjects.indexOf(usedObjects[i]) == -1)
+      result.push(usedObjects[i]);
+  }
+  return result;
+};
+
+// get the file that a given object was defined in
+var getFileFromObject = function(object, dependencies){
+  for(file in dependencies){
+    if(dependencies[file].definedObjects.indexOf(object) != -1)
+      return file;
+  }
+  console.log(object);
+  return null;
+};
+
+var gatherRequiredFiles = function(file, dependencies){
+  var undefinedUsedObjects = getUndefinedUsedObjects(dependencies[file])
+  return undefinedUsedObjects.map(function(value){
+    return getFileFromObject(value, dependencies)
+  }).getUnique();
+};
+
 // Take dependencies, calculate requires, then prepend them
 var prependRequires = function(dependencies, asts){
-
+  for(var file in asts){
+    if(path.basename(file) != "Three.js"){
+      var required_files = gatherRequiredFiles(file, dependencies).map(function(value){
+        if(value != null)
+          return path.relative(file, value);
+      });
+    }
+  }
 };
 
 // Take declared objects and export them
@@ -210,5 +244,6 @@ var dependencies = {},
 asts = {};
 
 calculateDependenciesAndASTs(working_path, dependencies, asts);
+console.log(dependencies);
 transformASTs(dependencies, asts);
 writeFiles(working_path, dependencies, asts);
