@@ -1,5 +1,5 @@
 {
-  "name": "THREE",
+  "name": "threejs-browserify-conversion-utility",
   "version": "0.0.0",
   "private": true,
   "devDependencies": {
