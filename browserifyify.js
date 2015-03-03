@@ -65,9 +65,9 @@ var calculateDependenciesAndASTs = function(file, dependencies, asts){
   if(fs.lstatSync(file).isDirectory()){
 
     var file_list = fs.readdirSync(file);
-    for(var i = 0; i < file_list.length; i++){
+    for(var i = 0; i < file_list.length; i++)
       calculateDependenciesAndASTs(path.join(file, file_list[i]), dependencies, asts);
-    }
+
   }else
     calcJSDependenciesAndASTs(file, dependencies, asts);
 };
@@ -83,9 +83,8 @@ var writeJSFile = function(file, dependencies, asts){
 var writeFiles = function(file, dependencies, asts){
   if(fs.lstatSync(file).isDirectory()){
     var file_list = fs.readdirSync(file);
-    for(var i = 0; i < file_list.length; i++){
+    for(var i = 0; i < file_list.length; i++)
       writeFiles(path.join(file, file_list[i]), dependencies, asts);
-    }
   }else
     writeJSFile(file, dependencies, asts);
 };
@@ -98,25 +97,85 @@ var isGlobalThreeObject = function(node, dependencies){
   }
   console.log(node.name);
 
-  if(dependencies[three].definedObjects.indexOf(node.name) != -1){
+  if(dependencies[three].definedObjects.indexOf(node.name) != -1)
     return true;
+
+  return false;
+};
+
+var isNonGlobalThreeObject = function(node, dependencies){
+  if(isGlobalThreeObject(node, dependencies))
+    return false;
+
+  for(var k in dependencies){
+    if(dependencies[k].definedObjects.indexOf(node.name) != -1)
+      return true;
   }
 
   return false;
 };
 
-// take dependencies and read in asts and then calculate new asts
-var transformASTs = function(dependencies, asts){
+var isNonGlobalAssignmentExpression = function(node, dependencies){
+  if(node.type == "ExpressionStatement"
+  && node.expression.type == "AssignmentExpression"
+  && node.expression.left.type == "Identifier"
+  && isNonGlobalThreeObject(node.expression.left, dependencies))
+    return true;
+  else
+    return false;
+};
+
+// If an object/constant/whatever was not declared in the top level Three.js file,
+// then we want to remove the leading THREE object from it, since it will
+// ultimately be declared as a local variable and then exported and loaded from
+// the three object.
+var replaceNonGlobalhreeObjects = function(dependencies, asts){
   for(var file in asts){
     estraverse.replace(asts[file], {
       enter: function(node, parent){
-        if(isThreeObject(node) && !isGlobalThreeObject(node.property, dependencies)){
+        if(isThreeObject(node) && !isGlobalThreeObject(node.property, dependencies))
           return node.property;
-        } else
+        else
           return node;
       }
     });
   }
+};
+
+var replaceWithVariableDeclaration = function(node){
+
+};
+
+// Change statements of the form "NonGlobalThreeObject ="
+// to "var NonGlobalThreeObject ="
+var changeNonGlobalsToLocals = function(dependencies, asts){
+  for(var file in asts){
+    estraverse.replace(asts[file], {
+      enter: function(node, parent){
+        if(isNonGlobalAssignmentExpression(node, dependencies)){
+          return replaceWithVariableDeclaration(node);
+        }else
+          return node;
+      }
+    });
+  }
+};
+
+// Take dependencies, calculate requires, then prepend them
+var prependRequires = function(dependencies, asts){
+
+};
+
+// Take declared objects and export them
+var appendExports = function(dependencies, asts){
+
+};
+
+var transformASTs = function(dependencies, asts){
+  replaceNonGlobalThreeObjects(dependencies, asts);
+  changeNonGlobalsToLocals(dependencies, asts);
+  prependRequires(dependencies, asts);
+  appendExports(dependencies, asts);
 };
 
 var clean = function(){
