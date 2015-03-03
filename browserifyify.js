@@ -91,9 +91,18 @@ var writeFiles = function(file, dependencies, asts){
     writeJSFile(file, dependencies, asts);
 };
 
-// take dependencies and calculate new asts
-var transformASTs = function(dependencies, asts){
 
+// take dependencies and read in asts and then calculate new asts
+var transformASTs = function(dependencies, asts){
+  for(var file in asts){
+    estraverse.replace(asts[file], {
+      enter: function(node, parent){
+        if(isThreeObject(node)){
+          return node.property;
+        }
+      }
+    });
+  }
 };
 
 var clean = function(){
