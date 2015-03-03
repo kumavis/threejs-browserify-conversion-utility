@@ -75,7 +75,28 @@ var calculateDependenciesAndASTs = function(file, dependencies, asts){
     for(var i = 0; i < file_list.length; i++){
       calculateDependenciesAndASTs(path.join(file, file_list[i]), dependencies, asts);
     }
-  }else calcJSDependenciesAndASTs(file, dependencies, asts);
+  }else
+    calcJSDependenciesAndASTs(file, dependencies, asts);
+};
+
+var writeJSFile = function(file, dependencies, asts){
+  if(path.extname(file) != '.js')
+    return;
+
+  var code = escodegen.generate(asts[file]);
+  fs.writeFileSync(file, code);
+};
+
+var writeFiles = function(file, dependencies, asts){
+  if(fs.lstatSync(file).isDirectory()){
+    // If what we have is a directory, then we want to go through
+    // each file in the directory and calculate the dependencies of each one.
+    var file_list = fs.readdirSync(file);
+    for(var i = 0; i < file_list.length; i++){
+      writeFiles(path.join(file, file_list[i]), dependencies, asts);
+    }
+  }else
+    writeJSFile(file, dependencies, asts);
 };
 
 var clean = function(){
@@ -100,6 +121,6 @@ var dependencies = {},
 asts = {};
 
 calculateDependenciesAndASTs(working_path, dependencies, asts);
-
+writeFiles(working_path, dependencies, asts);
 // calculate initial dependencies, first pass
 console.log(dependencies)
