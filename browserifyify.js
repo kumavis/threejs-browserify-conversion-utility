@@ -63,8 +63,7 @@ var calcJSDependenciesAndASTs = function(file, dependencies, asts){
 
 var calculateDependenciesAndASTs = function(file, dependencies, asts){
   if(fs.lstatSync(file).isDirectory()){
-    // If what we have is a directory, then we want to go through
-    // each file in the directory and calculate the dependencies of each one.
+
     var file_list = fs.readdirSync(file);
     for(var i = 0; i < file_list.length; i++){
       calculateDependenciesAndASTs(path.join(file, file_list[i]), dependencies, asts);
@@ -91,15 +90,30 @@ var writeFiles = function(file, dependencies, asts){
     writeJSFile(file, dependencies, asts);
 };
 
+var isGlobalThreeObject = function(node, dependencies){
+  var three;
+  for(var k in dependencies){
+    if(path.basename(k)=="Three.js")
+      three = k;
+  }
+  console.log(node.name);
+
+  if(dependencies[three].definedObjects.indexOf(node.name) != -1){
+    return true;
+  }
+
+  return false;
+};
 
 // take dependencies and read in asts and then calculate new asts
 var transformASTs = function(dependencies, asts){
   for(var file in asts){
     estraverse.replace(asts[file], {
       enter: function(node, parent){
-        if(isThreeObject(node)){
+        if(isThreeObject(node) && !isGlobalThreeObject(node.property, dependencies)){
           return node.property;
-        }
+        } else
+          return node;
       }
     });
   }
@@ -129,5 +143,4 @@ asts = {};
 calculateDependenciesAndASTs(working_path, dependencies, asts);
 transformASTs(dependencies, asts);
 writeFiles(working_path, dependencies, asts);
-// calculate initial dependencies, first pass
 console.log(dependencies)
