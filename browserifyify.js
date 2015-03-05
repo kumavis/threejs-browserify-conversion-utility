@@ -41,7 +41,7 @@ var calcJSDependenciesAndASTs = function(file, dependencies, asts){
     usedObjects: []
   };
 
-  var tree = esprima.parse(fs.readFileSync(file));
+  var tree = esprima.parse(fs.readFileSync(file), {attachComment: true});
   asts[file] = tree; // save tree for future use
   estraverse.traverse(tree, {
     enter: function(node, parent){
@@ -76,7 +76,7 @@ var writeJSFile = function(file, dependencies, asts){
   if(path.extname(file) != '.js')
     return;
 
-  var code = escodegen.generate(asts[file]);
+  var code = escodegen.generate(asts[file], {comment: true});
   fs.writeFileSync(file, code);
 };
 

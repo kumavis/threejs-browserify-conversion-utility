@@ -17,5 +17,8 @@
     "gulp-wrap-amd": "^0.4.1",
     "gulp-wrap-commonjs": "^0.1.13",
     "uglifyify": "^3.0.1"
+  },
+  "dependencies": {
+    "jscs": "^1.11.3"
   }
 }
