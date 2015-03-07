@@ -1,6 +1,6 @@
 'use strict'
 var gulp       = require('gulp')
-var gp         = (require ('gulp-load-plugins'), lazy: false)
+var gp         = require('gulp-load-plugins')
 var path       = require('path')
 var browserify = require('browserify')
 var source     = require('vinyl-source-stream')
@@ -8,12 +8,11 @@ var source     = require('vinyl-source-stream')
 // JS
 gulp.task('build', function(){
 
-  browserify(
-
+  browserify({
     entries: ['./src/Three.js'],
-    extensions: ['.js']
-
-  )
+    extensions: ['.js'],
+    standalone: 'THREE'
+  })
 
   .transform('uglifyify')
 
@@ -27,7 +26,7 @@ gulp.task('build', function(){
 })
 
 gulp.task('default', function(){
-  
+
   gulp.start('build')
 
 });

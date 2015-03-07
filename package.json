@@ -19,6 +19,8 @@
     "uglifyify": "^3.0.1"
   },
   "dependencies": {
-    "jscs": "^1.11.3"
+    "gulp-load-plugins": "^0.8.1",
+    "jscs": "^1.11.3",
+    "vinyl-source-stream": "^1.1.0"
   }
 }
