@@ -2,9 +2,9 @@
 A utility that takes a three.js development directory, and generates a source tree and build script for building three.js using browserify.
 
 To use, clone the repo then:
-cd threejs-browerify-conversion-utility-clone'
+cd threejs-browerify-conversion-utility-clone
 npm install
-./browserifyify relative-path-to-threejs-dev-directory
+node ./browserifyify relative-path-to-threejs-dev-directory
 
 The script WILL NOT modify your copy of three.js.
 It will copy the src and examples directory from your working copy
