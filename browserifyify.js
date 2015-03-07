@@ -8,6 +8,7 @@ var replaceNonGlobalThreeObjects = threeVariables.replaceNonGlobalThreeObjects;
 var changeNonGlobalsToLocals = threeVariables.changeNonGlobalsToLocals;
 var appendExports = require('./generate-exports').appendExports;
 var writeFiles = require('./write-files').writeFiles;
+var mrdoobify = require('./mrdoobify');
 
 var transformASTs = function(dependencies, asts){
   replaceNonGlobalThreeObjects(dependencies, asts);
@@ -40,3 +41,4 @@ asts = {};
 calculateDependenciesAndASTs(working_path, dependencies, asts);
 transformASTs(dependencies, asts);
 writeFiles(working_path, dependencies, asts);
+mrdoobify(working_path);
