@@ -239,10 +239,8 @@ var getRequiredVariables = function(file, dependencies){
     return [];
 };
 
-// Take a path, and a list of variables that need
-// to be included from the exports object and generate
-// ast node(s) for a require statement from it.
-var generateRequires = function(path, required_variables){
+
+var generateRequiresNonGlobal = function(path, required_variables){
   if(required_variables.length == 1){
     var new_node = {};
     new_node.type = "VariableDeclaration";
@@ -314,6 +312,99 @@ var generateRequires = function(path, required_variables){
     return [];
 };
 
+var generateRequiresGlobal = function(path, required_variables){
+  if(required_variables.length == 1){
+    var new_node = {};
+    new_node.type = "ExpressionStatement";
+    var expression = {
+      type: "AssignmentExpression",
+        operator: "=",
+        left: {
+          type: "MemberExpression",
+          computed: false,
+          object: {
+            type: "Identifier",
+            name: "THREE"
+          },
+          property: {
+            type: "Identifier",
+            name: required_variables[0]
+          }
+        },
+        right: {
+          type: "CallExpression",
+          callee: {
+            type: "Identifier",
+            name: "require"
+          },
+          arguments: [{
+            type: "Literal",
+            value: path,
+            raw: "'"+path+"'"
+          }]
+        }
+      }
+    new_node.expression = expression;
+    return [new_node];
+  }else if(required_variables.length > 1){
+    var result = [];
+    for(var i = 0; i < required_variables.length; i++){
+      var new_node = {};
+      new_node.type = "ExpressionStatement";
+      var expression = {
+        type: "AssignmentExpression",
+          operator: "=",
+          left: {
+            type: "MemberExpression",
+            computed: false,
+            object: {
+              type: "Identifier",
+              name: "THREE"
+            },
+            property: {
+              type: "Identifier",
+              name: required_variables[i]
+            }
+          },
+          right: {
+            type: "MemberExpression",
+            computed: false,
+            object: {
+              type: "CallExpression",
+              callee: {
+                type: "Identifier",
+                name: "require"
+              },
+              arguments: [{
+                type: "Literal",
+                value: path,
+                raw: "'"+path+"'"
+              }]
+            },
+            property: {
+              type: "Identifier",
+              name: required_variables[i]
+            }
+          }
+        };
+      new_node.expression = expression;
+      result.push(new_node);
+    }
+
+    return result;
+  }else
+    return [];
+};
+// Take a path, and a list of variables that need
+// to be included from the exports object and generate
+// ast node(s) for a require statement from it.
+var generateRequires = function(file, the_path, required_variables){
+  if(path.basename(file) != "Three.js")
+    return generateRequiresNonGlobal(the_path, required_variables);
+  else
+    return generateRequiresGlobal(the_path, required_variables);
+};
+
 // Given our source file, a list of files to require, and
 // a dependency structure, generate relative require statements
 var generateRequireNodes = function(file, file_list, dependencies){
@@ -329,11 +420,11 @@ var generateRequireNodes = function(file, file_list, dependencies){
   var require_nodes = [];
 
   for(var i = 0; i < file_list.length; i++){
-    require_nodes = require_nodes.concat(generateRequires(require_paths[i], required_variables[i]));
+    require_nodes = require_nodes.concat(generateRequires(file, require_paths[i], required_variables[i]));
   }
 
   return require_nodes;
-}
+};
 
 // Take dependencies, calculate requires, then prepend them
 var prependRequires = function(dependencies, asts){
