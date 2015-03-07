@@ -1,5 +1,16 @@
 var path = require('path');
-var replaceNonGlobalThreeObjects = require('./three-variables').replaceNonGlobalThreeObjects;
+
+Array.prototype.getUnique = function(){
+   var u = {}, a = [];
+   for(var i = 0, l = this.length; i < l; ++i){
+      if(u.hasOwnProperty(this[i])) {
+         continue;
+      }
+      a.push(this[i]);
+      u[this[i]] = 1;
+   }
+   return a;
+};
 
 // Given a dependency entry for a particular file of the form
 // {definedObjects: ..., usedObjects: ...}
@@ -31,11 +42,9 @@ var getFileFromObject = function(object, dependencies){
 // required by a particular file
 var gatherRequiredFiles = function(file, dependencies){
   var undeclaredUsedObjects = getUndeclaredUsedObjects(dependencies[file]);
-  console.log(undeclaredUsedObjects);
   var required_files = undeclaredUsedObjects.map(function(value){
     return getFileFromObject(value, dependencies)
   }).getUnique();
-  console.log(required_files);
   return required_files;
 };
 

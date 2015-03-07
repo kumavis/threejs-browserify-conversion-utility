@@ -1,34 +1,13 @@
 var fs = require('fs-extra');
 var path = require('path');
-var escodegen = require('escodegen');
 var astsDependencies = require('./asts-dependencies');
 var calculateDependenciesAndASTs = astsDependencies.calculateDependenciesAndASTs;
 var prependRequires = require('./generate-requires').prependRequires;
 var threeVariables = require('./three-variables');
 var replaceNonGlobalThreeObjects = threeVariables.replaceNonGlobalThreeObjects;
 var changeNonGlobalsToLocals = threeVariables.changeNonGlobalsToLocals;
-
-var writeJSFile = function(file, dependencies, asts){
-  if(path.extname(file) != '.js')
-    return;
-
-  var code = escodegen.generate(asts[file], {comment: true});
-  fs.writeFileSync(file, code);
-};
-
-var writeFiles = function(file, dependencies, asts){
-  if(fs.lstatSync(file).isDirectory()){
-    var file_list = fs.readdirSync(file);
-    for(var i = 0; i < file_list.length; i++)
-      writeFiles(path.join(file, file_list[i]), dependencies, asts);
-  }else
-    writeJSFile(file, dependencies, asts);
-};
-
-// Take declared objects and export them
-var appendExports = function(dependencies, asts){
-
-};
+var appendExports = require('./generate-exports').appendExports;
+var writeFiles = require('./write-files').writeFiles;
 
 var transformASTs = function(dependencies, asts){
   replaceNonGlobalThreeObjects(dependencies, asts);
