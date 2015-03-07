@@ -287,3 +287,4 @@ var prependRequires = function(dependencies, asts){
 };
 
 module.exports.prependRequires = prependRequires;
+module.exports.getRequiredVariables = getRequiredVariables;
