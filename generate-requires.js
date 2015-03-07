@@ -215,6 +215,7 @@ var generateRequiresGlobal = function(path, required_variables){
   }else
     return [];
 };
+
 // Take a path, and a list of variables that need
 // to be included from the exports object and generate
 // ast node(s) for a require statement from it.
@@ -229,8 +230,16 @@ var generateRequires = function(file, the_path, required_variables){
 // a dependency structure, generate relative require statements
 var generateRequireNodes = function(file, file_list, dependencies){
   var require_paths = file_list.map(function(value){
-    if(value != null)
-      return path.relative(file, value);
+    if(value != null){
+      var src_dir = path.dirname(file);
+      var dest_dir = path.dirname(value);
+      var dest_file = path.basename(value);
+      var relative_path = path.relative(src_dir, dest_dir);
+      var relative_file = path.join(relative_path, dest_file);
+      if(relative_file.split(path.sep)[0] != '..')
+        relative_file = '.' + path.sep + relative_file;
+      return relative_file;
+    }
   });
 
   var required_variables = file_list.map(function(value){
