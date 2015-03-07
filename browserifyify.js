@@ -20,6 +20,7 @@ var transformASTs = function(dependencies, asts){
 var clean = function(){
   fs.removeSync(path.join(__dirname, 'src'));
   fs.removeSync(path.join(__dirname, 'examples'));
+  fs.removeSync(path.join(__dirname, 'build'))
 };
 
 
@@ -33,12 +34,19 @@ var src_path = path.join(three_path, 'src');
 var examples_path = path.join(three_path, 'examples');
 var working_path = path.join(__dirname, 'src');
 
+console.log("Copying src directory");
 fs.copySync(src_path, working_path);
+console.log("Copying examples directory");
 fs.copySync(examples_path, path.join(__dirname, 'examples'));
+fs.mkdir(path.join(__dirname, 'build'));
 var dependencies = {},
 asts = {};
 
+console.log("Computing dependencies and asts");
 calculateDependenciesAndASTs(working_path, dependencies, asts);
+console.log("Running source transforms");
 transformASTs(dependencies, asts);
+console.log("Writing files");
 writeFiles(working_path, dependencies, asts);
 mrdoobify(working_path);
+console.log("Done");
