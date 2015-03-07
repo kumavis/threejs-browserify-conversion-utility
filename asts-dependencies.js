@@ -5,6 +5,7 @@ var estraverse = require('estraverse');
 var threeUtils = require('./three-utils');
 var isThreeObject = threeUtils.isThreeObject;
 var isThreeAssignment = threeUtils.isThreeAssignment;
+var replaceNonGlobalThreeObjects = require('./three-variables').replaceNonGlobalThreeObjects;
 
 Array.prototype.getUnique = function(){
    var u = {}, a = [];
@@ -65,5 +66,4 @@ var calculateDependenciesAndASTs = function(file, dependencies, asts){
     calcJSDependenciesAndASTs(file, dependencies, asts);
 };
 
-module.exports.calcJSDependenciesAndASTs = calcJSDependenciesAndASTs;
 module.exports.calculateDependenciesAndASTs = calculateDependenciesAndASTs;
