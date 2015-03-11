@@ -1,16 +1,5 @@
 var path = require('path');
-
-Array.prototype.getUnique = function(){
-   var u = {}, a = [];
-   for(var i = 0, l = this.length; i < l; ++i){
-      if(u.hasOwnProperty(this[i])) {
-         continue;
-      }
-      a.push(this[i]);
-      u[this[i]] = 1;
-   }
-   return a;
-};
+var unique = require('uniq');
 
 // Given a dependency entry for a particular file of the form
 // {definedObjects: ..., usedObjects: ...}
@@ -42,9 +31,9 @@ var getFileFromObject = function(object, dependencies){
 // required by a particular file
 var gatherRequiredFiles = function(file, dependencies){
   var undeclaredUsedObjects = getUndeclaredUsedObjects(dependencies[file]);
-  var required_files = undeclaredUsedObjects.map(function(value){
+  var required_files = unique(undeclaredUsedObjects.map(function(value){
     return getFileFromObject(value, dependencies)
-  }).getUnique();
+  }));
   return required_files;
 };
 

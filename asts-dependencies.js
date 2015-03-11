@@ -6,18 +6,8 @@ var threeUtils = require('./three-utils');
 var isThreeObject = threeUtils.isThreeObject;
 var isThreeAssignment = threeUtils.isThreeAssignment;
 var replaceNonGlobalThreeObjects = require('./three-variables').replaceNonGlobalThreeObjects;
+var unique = require('uniq');
 
-Array.prototype.getUnique = function(){
-   var u = {}, a = [];
-   for(var i = 0, l = this.length; i < l; ++i){
-      if(u.hasOwnProperty(this[i])) {
-         continue;
-      }
-      a.push(this[i]);
-      u[this[i]] = 1;
-   }
-   return a;
-}
 
 // Calculate the dependencies and abstract syntax trees of a particular javascript file
 var calcJSDependenciesAndASTs = function(file, dependencies, asts){
@@ -39,12 +29,12 @@ var calcJSDependenciesAndASTs = function(file, dependencies, asts){
         dependencies[file].definedObjects.push(
            node.left.property.name
         );
-        dependencies[file].definedObjects = dependencies[file].definedObjects.getUnique();
+        dependencies[file].definedObjects = unique(dependencies[file].definedObjects);
       } else if(isThreeObject(node)){
           dependencies[file].usedObjects.push(
             node.property.name
           );
-          dependencies[file].usedObjects = dependencies[file].usedObjects.getUnique();
+          dependencies[file].usedObjects = unique(dependencies[file].usedObjects);
         }
       }
     }
