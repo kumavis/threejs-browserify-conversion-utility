@@ -11,7 +11,8 @@ gulp.task('build', function(){
   browserify({
     entries: ['./src/Three.js'],
     extensions: ['.js'],
-    standalone: 'THREE'
+    standalone: 'THREE',
+    debug: true
   })
 
   .transform('uglifyify')
