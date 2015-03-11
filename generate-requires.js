@@ -112,10 +112,10 @@ var generateRequiresNonGlobal = function(path, required_variables){
         }
       }];
       new_node.declarations = declarations;
+
       new_node.kind = "var";
       result.push(new_node);
     }
-
     return result;
   }else
     return [];
@@ -153,7 +153,10 @@ var generateRequiresGlobal = function(path, required_variables){
           }]
         }
       }
+    if(required_variables[0]=='ThreeMath')
+      expression.left.property.name = 'Math';
     new_node.expression = expression;
+
     return [new_node];
   }else if(required_variables.length > 1){
     var result = [];
@@ -196,6 +199,9 @@ var generateRequiresGlobal = function(path, required_variables){
             }
           }
         };
+      if(required_variables[i]=='ThreeMath')
+        expression.left.property.name = 'Math';
+
       new_node.expression = expression;
       result.push(new_node);
     }

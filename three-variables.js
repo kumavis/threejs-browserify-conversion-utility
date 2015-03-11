@@ -16,9 +16,11 @@ var replaceNonGlobalThreeObjects = function(dependencies, asts){
   for(var file in asts){
     estraverse.replace(asts[file], {
       enter: function(node, parent){
-        if(isThreeObject(node) && !isGlobalThreeObject(node.property, dependencies))
+        if(isThreeObject(node) && !isGlobalThreeObject(node.property, dependencies)){
+          if(node.property.name=='Math')
+            node.property.name = 'ThreeMath';
           return node.property;
-        else
+        }else
           return node;
       }
     });
@@ -41,6 +43,9 @@ var replaceWithVariableDeclaration = function(node){
     id: node.expression.left,
     init: node.expression.right
   }];
+
+  if(declarations[0].id.name == 'Math')
+    declarations[0].id.name = 'ThreeMath'
   new_node.declarations = declarations;
   new_node.kind = "var";
   return new_node;

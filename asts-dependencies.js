@@ -26,14 +26,24 @@ var calcJSDependenciesAndASTs = function(file, dependencies, asts){
   estraverse.traverse(tree, {
     enter: function(node, parent){
       if(isThreeAssignment(node)){
+        if(node.left.property.name == 'Math')
+          dependencies[file].definedObjects.push(
+            'ThreeMath'
+          );
+        else
         dependencies[file].definedObjects.push(
-           node.left.property.name
+          node.left.property.name
         );
         dependencies[file].definedObjects = unique(dependencies[file].definedObjects);
       } else if(isThreeObject(node)){
-          dependencies[file].usedObjects.push(
-            node.property.name
-          );
+          if(node.property.name == 'Math')
+            dependencies[file].usedObjects.push(
+              'ThreeMath'
+            );
+          else
+            dependencies[file].usedObjects.push(
+              node.property.name
+            );
           dependencies[file].usedObjects = unique(dependencies[file].usedObjects);
         }
       }
