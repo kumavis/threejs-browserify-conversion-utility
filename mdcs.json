@@ -225,7 +225,7 @@
       "ParameterComma" : 0,
       "ParameterList" : 0,
       "SwitchDiscriminantOpening" : 1,
-      "SwitchDiscriminantClosing" : 0,
+      "SwitchDiscriminantClosing" : 1,
       "ThrowKeyword": 1,
       "TryKeyword": -1,
       "TryOpeningBrace" : 1,
