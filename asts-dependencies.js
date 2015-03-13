@@ -1,6 +1,7 @@
 var fs = require('fs-extra');
 var path = require('path');
-var esprima = require('esprima');
+var acorn = require('acorn');
+var escodegen = require('escodegen');
 var estraverse = require('estraverse');
 var threeUtils = require('./three-utils');
 var isThreeObject = threeUtils.isThreeObject;
@@ -21,7 +22,18 @@ var calcJSDependenciesAndASTs = function(file, dependencies, asts){
     usedObjects: []
   };
 
-  var tree = esprima.parse(fs.readFileSync(file), {attachComment: true});
+  var src = fs.readFileSync(file);
+  var comments = [], tokens = [];
+  var tree = acorn.parse(src, {
+    // collect ranges for each node
+    ranges: true,
+    // collect comments in Esprima's format
+    onComment: comments,
+    // collect token ranges
+    onToken: tokens,
+  });
+  escodegen.attachComments(tree, comments, tokens);
+
   asts[file] = tree; // save tree for future use
   estraverse.traverse(tree, {
     enter: function(node, parent){
