@@ -1,4 +1,6 @@
 # threejs-browserify-conversion-utility
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/kumavis/threejs-browserify-conversion-utility.svg)](https://greenkeeper.io/)
 A utility that takes a three.js development directory, and generates a source tree and build script for building three.js using browserify.
 
 # Usage
